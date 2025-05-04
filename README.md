@@ -1,2 +1,0 @@
-# ResumeFlow-
-AI Resume
