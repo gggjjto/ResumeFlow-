@@ -3,13 +3,15 @@ export interface BasicInfo {
   email: string;
   phone: string;
   title: string;
+  position?: string;
 }
 
 export interface Education {
   school: string;
   major: string;
   degree: string;
-  graduationYear: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface Experience {

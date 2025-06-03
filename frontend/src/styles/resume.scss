@@ -23,3 +23,65 @@
     color: #1890ff;
   }
 }
+
+.education-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.school {
+  font-weight: bold;
+  min-width: 200px;
+}
+
+.major {
+  flex: 1;
+  padding: 0 20px;
+}
+
+.degree-date {
+  text-align: right;
+  color: #666;
+}
+
+.resume-content {
+  background: white;
+  padding: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 0 auto;
+  font-size: 16px;
+}
+
+.section {
+  margin: 20px 0;
+}
+
+h2 {
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 8px;
+  margin: 24px 0 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;  // 使按钮分布在两端
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+  
+  .ant-btn {
+    min-width: 100px;  // 确保按钮宽度一致
+    
+    &:first-child {
+      margin-right: auto;  // 第一个按钮（上一步）靠左
+    }
+    
+    &:last-child {
+      margin-left: auto;   // 最后一个按钮（下一步）靠右
+    }
+  }
+}

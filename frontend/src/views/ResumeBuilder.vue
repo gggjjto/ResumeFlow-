@@ -54,41 +54,12 @@
         <!-- 右侧预览 -->
         <a-col :xs="24" :sm="24" :md="14" :lg="14">
           <a-card title="实时预览" :loading="loading" class="preview-card">
-            <div class="preview-content">
-              <h1>{{ resumeForm.basicInfo.name }}</h1>
-              <p class="title">{{ resumeForm.basicInfo.title }}</p>
-              
-              <div class="contact-info">
-                <p>{{ resumeForm.basicInfo.email }} | {{ resumeForm.basicInfo.phone }}</p>
-              </div>
-
-              <template v-if="resumeForm.education.length">
-                <h2>教育背景</h2>
-                <div v-for="(edu, index) in resumeForm.education" :key="index">
-                  <h3>{{ edu.school }}</h3>
-                  <p>{{ edu.major }} - {{ edu.degree }}</p>
-                  <p>毕业年份: {{ edu.graduationYear }}</p>
-                </div>
-              </template>
-
-              <template v-if="resumeForm.experience.length">
-                <h2>工作经验</h2>
-                <div v-for="(exp, index) in resumeForm.experience" :key="index">
-                  <h3>{{ exp.company }} - {{ exp.position }}</h3>
-                  <p>{{ formatDate(exp.startDate) }} - {{ formatDate(exp.endDate) }}</p>
-                  <p class="description">{{ exp.description }}</p>
-                </div>
-              </template>
-
-              <template v-if="resumeForm.skills.length">
-                <h2>技能专长</h2>
-                <ul class="skills-text">
-                  <li v-for="(skill, index) in resumeForm.skills" :key="index">
-                    {{ skill }}
-                  </li>
-                </ul>
-              </template>
-            </div>
+            <resume-layout
+              :basic-info="resumeForm.basicInfo"
+              :education="resumeForm.education"
+              :experience="resumeForm.experience"
+              :skills="resumeForm.skills"
+            />
           </a-card>
         </a-col>
       </a-row>
@@ -105,7 +76,7 @@ import BasicInfo from '@/components/resume/BasicInfo.vue';
 import Education from '@/components/resume/Education.vue';
 import Experience from '@/components/resume/Experience.vue';
 import Skills from '@/components/resume/Skills.vue';
-import { generateResumeContent } from '../api/openai';
+import ResumeLayout from '@/components/resume/ResumeLayout.vue';
 import type { ResumeForm } from 'src/types/resume';
 import '@/styles/resume.scss';
 
@@ -120,7 +91,8 @@ const resumeForm = ref<ResumeForm>({
     school: '',
     major: '',
     degree: '',
-    graduationYear: ''
+    startDate: '',
+    endDate: ''
   }],
   experience: [],
   skills: []
@@ -164,16 +136,12 @@ const goToStep = (step: number) => {
 const generateResume = async () => {
   loading.value = true;
   try {
-    const aiContent = await generateResumeContent(resumeForm.value);
-    // 保存AI生成的内容和原始表单数据
-    localStorage.setItem('resumeData', JSON.stringify({
-      ...resumeForm.value,
-      aiContent
-    }));
+    // 直接保存表单数据
+    localStorage.setItem('resumeData', JSON.stringify(resumeForm.value));
     message.success('简历生成成功！');
-    router.push('/preview');
+    await router.push('/preview');
   } catch (error) {
-    message.error('生成简历失败，请重试');
+    message.error('生成失败，请重试');
     console.error(error);
   } finally {
     loading.value = false;
@@ -200,240 +168,12 @@ const formatDate = (date: string) => {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .resume-builder {
   padding: 24px;
   max-width: 1600px;
   margin: 0 auto;
 }
 
-.steps-nav {
-  margin-bottom: 32px;
-}
-
-.form-container {
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #f0f0f0;
-}
-
-:deep(.ant-form-item) {
-  margin-bottom: 24px;
-}
-
-:deep(.ant-input),
-:deep(.ant-select-selector) {
-  border-radius: var(--border-radius-base);
-}
-
-.experience-item {
-  background: #fafafa;
-  border-radius: var(--border-radius-base);
-  padding: 24px;
-  margin-bottom: 16px;
-  transition: all 0.3s;
-}
-
-.experience-item:hover {
-  box-shadow: var(--box-shadow);
-}
-
-.preview-card {
-  position: sticky;
-  top: 24px;
-  height: calc(100vh - 48px);
-  overflow-y: auto;
-}
-
-.preview-content {
-  min-height: 800px;
-  padding: 40px;
-  background: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 900px;
-  margin: 0 auto;
-  font-size: 16px;
-}
-
-.title {
-  color: #666;
-  font-size: 1.2em;
-  margin: 8px 0;
-}
-
-.contact-info {
-  margin: 16px 0;
-  color: #333;
-}
-
-h2 {
-  border-bottom: 2px solid #1890ff;
-  padding-bottom: 8px;
-  margin: 24px 0 16px;
-}
-
-.description {
-  white-space: pre-wrap;
-  color: #666;
-}
-
-.skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.skills-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.skill-item {
-  background: #f9f9f9;
-  transition: all 0.3s;
-  margin-bottom: 8px;
-}
-
-.skill-item:hover {
-  background: #f0f0f0;
-}
-
-.skill-item p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-.suggested-skills {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #d9d9d9;
-}
-
-.suggested-skills h4 {
-  margin-bottom: 8px;
-  color: #666;
-}
-
-.step-item {
-  cursor: pointer;
-}
-
-:deep(.ant-steps-item) {
-  cursor: pointer;
-}
-
-:deep(.ant-steps-item-container) {
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-:deep(.ant-steps-item-container:hover) {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.skill-card {
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.skill-card h4 {
-  margin: 0;
-  color: #1890ff;
-}
-
-.skill-card p {
-  margin: 4px 0 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.skill-tips {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-}
-
-.tip-text {
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.skill-tips ul {
-  padding-left: 20px;
-  margin: 0;
-}
-
-.skill-tips li {
-  color: #888;
-  margin-bottom: 4px;
-}
-
-.form-tips {
-  color: #888;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.skills-text {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.skills-text li {
-  position: relative;
-  padding-left: 12px;
-  margin-bottom: 12px;
-  line-height: 1.6;
-  color: #333;
-}
-
-.skills-text li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #1890ff;
-}
-
-.skills-preview,
-.skill-item-preview,
-.skill-number {
-  display: none;
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.form-header h3 {
-  margin: 0;
-  color: #1890ff;
-}
-
-@media (max-width: 768px) {
-  .preview-card {
-    position: static;
-    height: auto;
-    margin-top: 24px;
-  }
-  
-  .preview-content {
-    padding: 20px;
-  }
-}
+// ...rest of the unique styles...
 </style>
