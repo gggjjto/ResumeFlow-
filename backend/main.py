@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from src.database import engine
 from src.models import user as models
-from src.routes import user
+from src.routes import resume, template
 
 app = FastAPI(title="ResumeFlow API")
 
@@ -13,6 +13,8 @@ models.Base.metadata.create_all(bind=engine)
 
 # 注册路由
 app.include_router(user.router)
+app.include_router(resume.router)
+app.include_router(template.router)
 
 
 @app.get("/")

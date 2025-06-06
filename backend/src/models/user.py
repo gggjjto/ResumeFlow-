@@ -3,6 +3,7 @@
 import enum
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from src.database import Base
@@ -10,6 +11,7 @@ from src.database import Base
 
 class UserRole(enum.Enum):
     """用户角色枚举类"""
+
     NORMAL = "normal"
     PREMIUM = "premium"
     ADMIN = "admin"
@@ -30,3 +32,5 @@ class User(Base):
     phone = Column(String(20))
     avatar = Column(String(200))
     is_active = Column(Boolean, default=True)
+
+    resumes = relationship("Resume", back_populates="user")
