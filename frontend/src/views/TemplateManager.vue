@@ -60,37 +60,62 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios'; // 新增
 
 interface Template {
   id: number;
   name: string;
 }
 
-const templates = ref<Template[]>([
-  { id: 1, name: '简约风格' },
-  { id: 2, name: '商务风格' }
-]);
+const templates = ref<Template[]>([]);
 const newTemplateName = ref('');
 const selectedTemplateId = ref<number | null>(null);
 
-const addTemplate = () => {
+// 获取模板列表
+const fetchTemplates = async () => {
+  try {
+    const res = await axios.get('/api/template/list');
+    templates.value = res.data || [];
+  } catch (e) {
+    templates.value = [];
+  }
+};
+
+onMounted(() => {
+  fetchTemplates();
+});
+
+const addTemplate = async () => {
   if (!newTemplateName.value.trim()) {
     alert('请输入模板名称');
     return;
   }
-  const newId = Date.now();
-  templates.value.push({ id: newId, name: newTemplateName.value });
-  newTemplateName.value = '';
+  try {
+    const res = await axios.post('/api/template/add', {
+      name: newTemplateName.value
+    });
+    // 假设返回新模板对象
+    templates.value.push(res.data);
+    newTemplateName.value = '';
+  } catch (e: any) {
+    alert(e?.response?.data?.message || '添加模板失败');
+  }
 };
 
-const removeTemplate = (index: number) => {
-  templates.value.splice(index, 1);
-  if (
-    selectedTemplateId.value &&
-    !templates.value.find(t => t.id === selectedTemplateId.value)
-  ) {
-    selectedTemplateId.value = null;
+const removeTemplate = async (index: number) => {
+  const template = templates.value[index];
+  try {
+    await axios.delete(`/api/template/delete/${template.id}`);
+    templates.value.splice(index, 1);
+    if (
+      selectedTemplateId.value &&
+      !templates.value.find(t => t.id === selectedTemplateId.value)
+    ) {
+      selectedTemplateId.value = null;
+    }
+  } catch (e: any) {
+    alert(e?.response?.data?.message || '删除模板失败');
   }
 };
 

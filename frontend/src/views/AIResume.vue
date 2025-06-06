@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import axios from 'axios'; // 新增
 
 const originContent = ref('');
 const optimizedContent = ref('');
@@ -33,11 +34,14 @@ const handleOptimize = async () => {
     return;
   }
   loading.value = true;
-  // 模拟AI优化，实际应调用后端API
-  await new Promise(r => setTimeout(r, 1200));
-  optimizedContent.value = originContent.value
-    .replace(/(\S)/g, '$1✨') // 示例：每个字后加✨，实际应为AI返回内容
-    .replace(/\n/g, '<br>');
+  try {
+    const res = await axios.post('/api/ai/optimize', {
+      content: originContent.value
+    });
+    optimizedContent.value = res.data?.result || '';
+  } catch (e: any) {
+    optimizedContent.value = '<span style="color:red;">AI优化失败，请稍后重试。</span>';
+  }
   loading.value = false;
 };
 </script>

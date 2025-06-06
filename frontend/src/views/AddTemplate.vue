@@ -26,19 +26,27 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios'; // 新增
 
 const templateName = ref('');
 const templateHtml = ref('');
 const router = useRouter();
 
-const handleAdd = () => {
+const handleAdd = async () => {
   if (!templateName.value || !templateHtml.value) {
     alert('请填写模板名称和HTML代码');
     return;
   }
-  // 实际项目中这里应上传到后端或存储到本地
-  alert('模板添加成功（仅本地预览，未真正保存）');
-  router.push('/templates');
+  try {
+    await axios.post('/api/template/add', {
+      name: templateName.value,
+      html: templateHtml.value
+    });
+    alert('模板添加成功');
+    router.push('/templates');
+  } catch (e: any) {
+    alert(e?.response?.data?.message || '模板添加失败，请重试');
+  }
 };
 </script>
 

@@ -79,6 +79,7 @@ import Skills from '@/components/resume/Skills.vue';
 import ResumeLayout from '@/components/resume/ResumeLayout.vue';
 import type { ResumeForm } from 'src/types/resume';
 import '@/styles/resume.scss';
+import axios from 'axios'; // 新增：引入axios
 
 const resumeForm = ref<ResumeForm>({
   basicInfo: {
@@ -136,8 +137,8 @@ const goToStep = (step: number) => {
 const generateResume = async () => {
   loading.value = true;
   try {
-    // 直接保存表单数据
-    localStorage.setItem('resumeData', JSON.stringify(resumeForm.value));
+    // 调用后端API保存简历
+    await axios.post('/api/resume/save', resumeForm.value);
     message.success('简历生成成功！');
     await router.push('/preview');
   } catch (error) {

@@ -26,13 +26,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios'; // 新增
 
 const username = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const router = useRouter();
 
-const handleRegister = () => {
+const handleRegister = async () => {
   if (!username.value || !password.value || !confirmPassword.value) {
     alert('请填写所有字段');
     return;
@@ -41,9 +42,16 @@ const handleRegister = () => {
     alert('两次输入的密码不一致');
     return;
   }
-  // 实际应调用后端API进行注册
-  alert('注册成功！请登录');
-  router.push('/login');
+  try {
+    await axios.post('/api/auth/register', {
+      username: username.value,
+      password: password.value
+    });
+    alert('注册成功！请登录');
+    router.push('/login');
+  } catch (e: any) {
+    alert(e?.response?.data?.message || '注册失败，请重试');
+  }
 };
 
 const goLogin = () => {

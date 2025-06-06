@@ -48,6 +48,7 @@ import { Document, Packer, Paragraph } from 'docx';
 import ResumeLayout from '@/components/resume/ResumeLayout.vue';
 import type { ResumeForm } from '../types/resume';
 import '@/styles/resume.scss';
+import axios from 'axios'; // 新增：引入axios
 
 const resumeData = ref<ResumeForm>(JSON.parse(localStorage.getItem('resumeData') || '{}'));
 const resumeContent = ref<HTMLElement | null>(null);
@@ -64,10 +65,16 @@ const handleAiOptimize = async () => {
     return;
   }
   aiLoading.value = true;
-  // 模拟AI优化，实际应调用后端API
-  await new Promise(r => setTimeout(r, 1200));
-  // 简单模拟：将提示词和简历内容拼接
-  aiResult.value = `<div style="color:#1890ff;">【AI优化】${aiPrompt.value}</div><div style="margin-top:8px;">${formatResumeHtml(resumeData.value)}</div>`;
+  try {
+    // 调用后端AI优化API
+    const res = await axios.post('/api/ai/optimize', {
+      prompt: aiPrompt.value,
+      resumeData: resumeData.value
+    });
+    aiResult.value = res.data?.result || '';
+  } catch (e) {
+    aiResult.value = '<div style="color:red;">AI优化失败，请稍后重试。</div>';
+  }
   aiLoading.value = false;
 };
 

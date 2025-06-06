@@ -20,18 +20,25 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios'; // 新增
 
 const username = ref('');
 const password = ref('');
 const router = useRouter();
 
-const handleLogin = () => {
-  // 简单示例，实际应调用后端API
-  if (username.value && password.value) {
-    // 登录成功后跳转
-    router.push('/');
-  } else {
+const handleLogin = async () => {
+  if (!username.value || !password.value) {
     alert('请输入用户名和密码');
+    return;
+  }
+  try {
+    await axios.post('/api/auth/login', {
+      username: username.value,
+      password: password.value
+    });
+    router.push('/');
+  } catch (e: any) {
+    alert(e?.response?.data?.message || '登录失败，请重试');
   }
 };
 </script>
